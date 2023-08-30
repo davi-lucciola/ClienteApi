@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from fastapi import HTTPException
 from database import BaseMeta
-from ormar import Model, Integer, String, Boolean
+from ormar import Model, Integer, String
 
 
 class Cliente(Model):
