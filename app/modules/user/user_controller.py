@@ -1,0 +1,35 @@
+from modules.user import *
+from fastapi import APIRouter, Depends
+from http.response import ApiResponse, HTTPStatus
+
+
+router = APIRouter(prefix='/user', tags=['user'])
+
+
+@router.get('/', status_code = HTTPStatus.OK)
+async def index(user_service: UserService = Depends(UserService)) -> list[User]:
+    ''' Endpoint para listar todos os usuarios '''
+    users = await user_service.find_all()
+    return users
+
+@router.get('/{id}', status_code = HTTPStatus.OK)
+async def show(id: int, user_service: UserService = Depends(UserService)) -> User:
+    ''' Endpoint para detalhar um usuario dado o identificador '''
+    user = await user_service.find_by_id(id)
+    return user
+
+@router.post('/', status_code = HTTPStatus.CREATED)
+async def save(user: UserSave, user_service: UserService = Depends(UserService)):
+    ''' Endpoint para cadastrar um usuario. '''
+    return ApiResponse('Usuário cadastrado com sucesso.', await user_service.save(user))
+
+@router.put('/{id}', status_code = HTTPStatus.CREATED)
+async def update(id: int, user: UserUpdate, user_service: UserService = Depends(UserService)):
+    ''' Endpoint para atualizar um usuario dado o identificador e os novos dados '''
+    return ApiResponse('Usuário editado com sucesso.', await user_service.update(user, id))
+
+@router.delete('/{id}', status_code = HTTPStatus.ACCEPTED)
+async def delete(id: int, user_service: UserService = Depends(UserService)):
+    ''' Endpoint para deletar um usuario dado o identificador'''
+    user_service.delete(id)
+    return ApiResponse('Usuário removido com sucesso.')
