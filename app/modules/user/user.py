@@ -1,5 +1,6 @@
 from database import BaseMeta
-from pydantic import BaseModel, validate_email, validator
+from pydantic import BaseModel, validator
+from email_validator import validate_email, EmailNotValidError
 from ormar import Model, Integer, String
 
 
@@ -18,8 +19,12 @@ class UserSave(BaseModel):
 
     @validator('email')
     def email_validation(cls, email: str):
-        print(email)
-        raise ValueError('Testando Validações: Email')
+        try:
+            validate_email(email)
+            return email
+        except EmailNotValidError as err:
+            raise ValueError(f'Email Inválido, por favor digite um email válido.')
 
 class UserUpdate(UserSave):
     new_password: str
+    

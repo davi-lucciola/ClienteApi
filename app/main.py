@@ -1,13 +1,13 @@
 import uvicorn
 from fastapi import FastAPI
 from database import criar_tabelas
-from modules.cliente.cliente_controller import router as cliente_controller
+from modules.user.user_controller import router as user_controller
 
 
-app = FastAPI(title='Api Cliente', description='Api para gerenciar clientes')
+app = FastAPI(title='Api User Template', description='Template de Usuarios para desenvolver')
 
-app.include_router(cliente_controller)
+app.include_router(user_controller)
 
 if __name__ == '__main__':
     criar_tabelas()
-    uvicorn.run('main:app', host='0.0.0.0', port=9000, reload=True)
+    uvicorn.run('main:app', host='127.0.0.1', port=9000, reload=True)

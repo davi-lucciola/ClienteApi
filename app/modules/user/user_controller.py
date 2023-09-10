@@ -1,6 +1,6 @@
 from modules.user import *
 from fastapi import APIRouter, Depends
-from http.response import ApiResponse, HTTPStatus
+from modules.responses import ApiResponse, HTTPStatus
 
 
 router = APIRouter(prefix='/user', tags=['user'])
@@ -21,15 +21,21 @@ async def show(id: int, user_service: UserService = Depends(UserService)) -> Use
 @router.post('/', status_code = HTTPStatus.CREATED)
 async def save(user: UserSave, user_service: UserService = Depends(UserService)):
     ''' Endpoint para cadastrar um usuario. '''
-    return ApiResponse('Usuário cadastrado com sucesso.', await user_service.save(user))
+    return ApiResponse(
+        message='Usuário cadastrado com sucesso.', 
+        created_id=await user_service.save(user)
+    )
 
 @router.put('/{id}', status_code = HTTPStatus.CREATED)
 async def update(id: int, user: UserUpdate, user_service: UserService = Depends(UserService)):
     ''' Endpoint para atualizar um usuario dado o identificador e os novos dados '''
-    return ApiResponse('Usuário editado com sucesso.', await user_service.update(user, id))
+    return ApiResponse(
+        message='Usuário editado com sucesso.', 
+        created_id=await user_service.update(user, id)
+    )
 
 @router.delete('/{id}', status_code = HTTPStatus.ACCEPTED)
 async def delete(id: int, user_service: UserService = Depends(UserService)):
     ''' Endpoint para deletar um usuario dado o identificador'''
     user_service.delete(id)
-    return ApiResponse('Usuário removido com sucesso.')
+    return ApiResponse(message='Usuário removido com sucesso.')

@@ -23,10 +23,10 @@ class UserService:
         return user
 
     async def find_by_email(self, email: str) -> User | None:
-        return User.objects.get_or_none(email = email)
+        return await User.objects.get_or_none(email = email)
 
     async def save(self, user: UserSave) -> int:
-        if self.find_by_email(user.email) is not None:
+        if await self.find_by_email(user.email) is not None:
             raise HTTPException(detail='Email já cadastrado.', status_code=HTTPStatus.BAD_REQUEST)
         
         if user.password != user.confirm_password:
