@@ -9,7 +9,7 @@ class User(Model):
         pass
     
     id: int | None = Integer(primary_key=True, autoincrement=True)
-    email: str = String(max_length=255, nullable=False)
+    email: str = String(max_length=255, nullable=False, unique=True)
     password: str = String(max_length=255, nullable=False)
 
 class UserSave(BaseModel):
@@ -27,4 +27,8 @@ class UserSave(BaseModel):
 
 class UserUpdate(UserSave):
     new_password: str
+
+class UserDTO(BaseModel):
+    id: int
+    email: str
     

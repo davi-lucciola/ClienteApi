@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from database import criar_tabelas
-from modules.user.user_controller import router as user_controller
+from controllers.user_controller import router as user_controller
 
 
 app = FastAPI(title='Api User Template', description='Template de Usuarios para desenvolver')
