@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from services import UserService, UserSeviceProvider
-from models import User, UserSave, UserUpdate, UserDTO
+from models import UserSave, UserUpdate, UserDTO
 from controllers.responses import ApiResponse, HTTPStatus
 
 
