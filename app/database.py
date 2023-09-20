@@ -18,6 +18,7 @@ class BaseMeta(ModelMeta):
     metadata = metadata
 
 
-def criar_tabelas():
+def create_tables() -> None:
+    ''' Cria tabelas no banco de acordo com os modelos mapeados '''
     global metadata, engine
     metadata.create_all(bind=engine)

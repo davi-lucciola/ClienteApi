@@ -1,8 +1,8 @@
 from http import HTTPStatus
 from fastapi import HTTPException
 from dataclasses import dataclass, field
-from security.crypt import CryptService
 from models.user import User, UserSave, UserUpdate
+from utils.security import CryptService
 
 
 @dataclass
@@ -26,12 +26,7 @@ class UserService:
         return user
 
     async def find_by_email(self, email: str) -> User | None:
-        user: User = await User.objects.get_or_none(email = email)
-        
-        if user is None:
-            raise HTTPException(detail='Usuario não encontrado.', status_code=HTTPStatus.NOT_FOUND)
-        
-        return user  
+        return await User.objects.get_or_none(email = email)
 
     async def save(self, user: UserSave) -> int:
         if await self.find_by_email(user.email) is not None:
@@ -64,6 +59,3 @@ class UserService:
     async def delete(self, user_id: int) -> None:
         user: User = await self.find_by_id(user_id)
         await user.delete()
-
-def UserSeviceProvider() -> UserService:
-    return UserService(CryptService())

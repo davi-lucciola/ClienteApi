@@ -31,4 +31,8 @@ class UserUpdate(UserSave):
 class UserDTO(BaseModel):
     id: int
     email: str
+
+class UserCredentials(BaseModel):
+    email: str
+    password: str
     
