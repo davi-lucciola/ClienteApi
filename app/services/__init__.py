@@ -1,2 +1,2 @@
-from .user_service import UserService
-from .auth_service import AuthService
+from .auth_service import AuthService, AuthServiceProvider
+from .user_service import UserService, UserServiceProvider

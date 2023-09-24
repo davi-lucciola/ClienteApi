@@ -6,9 +6,8 @@ from passlib.context import CryptContext
 class CryptService:
     pwd_context: CryptContext = field(default_factory=lambda: CryptContext(schemes=['bcrypt'], deprecated='auto'))
 
-    def hash_password(self, password) -> str:
-        return self.pwd_context.hash(password)
+    def hash(self, plain_text) -> str:
+        return self.pwd_context.hash(plain_text)
 
-    def check_password(self, password, hashed_password: str) -> bool:
-        return self.pwd_context.verify(password, hashed_password)
-
+    def check_hash(self, plain_text, hash: str) -> bool:
+        return self.pwd_context.verify(plain_text, hash)

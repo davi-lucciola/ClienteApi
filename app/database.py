@@ -1,11 +1,11 @@
-import decouple
+import decouple as env
 from ormar import ModelMeta
 from sqlalchemy import MetaData
 from databases import Database
 from sqlalchemy.engine import Engine, create_engine
 
 
-DATABASE_URL = decouple.config('DATABASE_URL')
+DATABASE_URL = env.config('DATABASE_URL')
 
 
 engine: Engine = create_engine(DATABASE_URL)

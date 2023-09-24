@@ -12,9 +12,20 @@ class User(Model):
     email: str = String(max_length=255, nullable=False, unique=True)
     password: str = String(max_length=255, nullable=False)
 
-class UserSave(BaseModel):
+
+class UserBase(BaseModel):
     email: str
     password: str
+
+    @validator('email')
+    def email_validation(cls, email: str):
+        try:
+            validate_email(email)
+            return email
+        except EmailNotValidError as err:
+            raise ValueError(f'Email Inválido, por favor digite um email válido.')
+
+class UserSave(UserBase):
     confirm_password: str
 
     @validator('email')
@@ -25,8 +36,9 @@ class UserSave(BaseModel):
         except EmailNotValidError as err:
             raise ValueError(f'Email Inválido, por favor digite um email válido.')
 
-class UserUpdate(UserSave):
+class UserUpdate(UserBase):
     new_password: str
+    confirm_new_password: str
 
 class UserDTO(BaseModel):
     id: int
