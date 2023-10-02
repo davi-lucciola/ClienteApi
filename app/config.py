@@ -6,10 +6,11 @@ from sqlalchemy.engine import Engine, create_engine
 
 
 DATABASE_URL = env.config('DATABASE_URL')
+TEST_DATABASE = env.config('TEST_DATABASE', False)
 
 
 engine: Engine = create_engine(DATABASE_URL)
-database = Database(DATABASE_URL)
+database = Database(DATABASE_URL, force_rollback=TEST_DATABASE)
 metadata = MetaData(bind=engine)
 
 
