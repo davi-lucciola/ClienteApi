@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.controllers import user_router, auth_router
+from app.api.controllers import *
 
 
 def create_app(title: str, description: str) -> FastAPI:
@@ -8,6 +8,7 @@ def create_app(title: str, description: str) -> FastAPI:
     # Routes
     app.include_router(auth_router)
     app.include_router(user_router)
+    app.include_router(permission_router)
     
     app = configure_database(app) 
 

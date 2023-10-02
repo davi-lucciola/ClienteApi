@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 from ormar import Model, Integer, String, DateTime, ForeignKey
 from app.config import BaseMeta
-from app.domain.models import  User
+from app.domain.models import User
 
 
 class Token(Model):

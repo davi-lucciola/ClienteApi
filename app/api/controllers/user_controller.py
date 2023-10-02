@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.api import HTTPStatus, Response
-from app.api.guard import AuthGuard, OwnerGuard
+from app.api.guard import AuthGuard, OwnerGuard, PermissionGuard
 from app.domain.models import *
 from app.domain.services import UserService
 
@@ -20,7 +20,11 @@ async def show(id: int, user_service: UserService = Depends(UserService)) -> Use
     return user
 
 @router.post('/secure', status_code = HTTPStatus.CREATED)
-async def save_secure(user: UserAdmin, user_service: UserService = Depends(UserService), token: Token = Depends(OwnerGuard(User))):
+async def save_secure(
+    user: UserAdmin, 
+    user_service: UserService = Depends(UserService), 
+    token: Token = Depends(PermissionGuard(':admin'))
+):
     ''' 
     Endpoint para cadastrar um usuario. (Autenticação Necessária).
     Somente usuários admin podem cadastrar outros usuários admin.

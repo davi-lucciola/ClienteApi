@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from dataclasses import dataclass
 from app.api import HTTPStatus
-from app.domain.models import User
+from app.domain.models import User, Permission
 from app.utils.security import CryptService
 
 
@@ -34,14 +34,20 @@ class UserService:
 
         user.password = self.crypt_service.hash(user.password)
 
-        new_user: User = user.upsert(**user.dict())
+        admin_permission = await Permission.objects.get_or_create(role=':admin')
+        if user.admin is True:
+            user.permissions.add(admin_permission)
+        else:
+            user.permissions.remove(admin_permission)
+        
+        print(user.permissions)
+        new_user: User = await user.upsert(**user.dict())
+        print(new_user.permissions)
         return new_user.id
 
     async def update(self, user: User, token: dict) -> int:
         user_in_db: User = await self.find_by_id(user.id)
         
-        
-
         if self.crypt_service.check_hash(user.password, user_in_db.password) is False:
             raise HTTPException(detail='Senha incorreta.', status_code=HTTPStatus.BAD_REQUEST)
 

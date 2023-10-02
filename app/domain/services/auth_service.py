@@ -6,14 +6,15 @@ from dataclasses import dataclass
 from app.api import HTTPStatus
 from app.domain.models import User, Token
 from app.domain.services import UserService
-from app.utils.security import JwtService
+from app.utils.security import JwtService, CryptService
 
 
 @dataclass
 class AuthService:
     __EXPIRATION_TIME = dt.timedelta(hours=1)
     jwt_service: JwtService = Depends(lambda: JwtService())
-    user_service: UserService = Depends(UserService)
+    crypt_service: CryptService = Depends(lambda: CryptService())
+
 
     def create_token(self, data: dict, initiated_at: dt, expires_on: dt) -> str:
         token_payload = {
@@ -63,12 +64,12 @@ class AuthService:
         return token
 
     async def login(self, credentials: User) -> str:
-        user: User = await self.user_service.find_by_email(credentials.email)
+        user: User = await User.objects.get_or_none(email = credentials.email)
         
         if user is None:
             raise HTTPException(detail='Email não encontrado.', status_code=HTTPStatus.NOT_FOUND)
         
-        if not self.user_service.crypt_service.check_hash(credentials.password, user.password):
+        if not self.crypt_service.check_hash(credentials.password, user.password):
             raise HTTPException(detail='Credenciais Inválidas.', status_code=HTTPStatus.UNAUTHORIZED)
 
         token_payload: dict = {

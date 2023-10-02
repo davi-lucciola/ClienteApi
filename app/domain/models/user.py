@@ -1,7 +1,8 @@
 from pydantic import BaseModel, validator
 from email_validator import validate_email, EmailNotValidError
-from ormar import Model, Integer, String, Boolean
+from ormar import Model, Integer, String, Boolean, ManyToMany
 from app.config import BaseMeta
+from app.domain.models import Permission
 
 
 class User(Model):
@@ -12,6 +13,7 @@ class User(Model):
     email: str = String(max_length=255, nullable=False, unique=True)
     password: str = String(max_length=255, nullable=False)
     admin: bool = Boolean(nullable=False, default=False)
+    permissions = ManyToMany(Permission, skip_reverse=True, through_relation_name='user_id', through_reverse_relation_name='permission_id')
 
 class UserBase(BaseModel):
     email: str

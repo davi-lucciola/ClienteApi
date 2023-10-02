@@ -16,15 +16,15 @@ class OwnerGuard(AuthGuard):
         auth: HTTPAuthorizationCredentials = Security(SECURITY_BEARER)
     ) -> Token:
         token: Token = await super().__call__(auth_service, auth)
-        token.user = await User.objects.get(id=token.user.id)
+        user: User = await User.objects.get(id=token.user.id)
 
         if self.model is User:
             entity: Model = await self.model.objects.get_or_none(id=id)
-            if not (token.user.admin is True or token.user.id == entity.id):
+            if not (user.admin is True or user.id == entity.id):
                 raise HTTPException(detail='Você não tem permissão para acessar este recurso', status_code=HTTPStatus.FORBIDDEN)
         else:
             entity: Model = await self.model.objects.select_related(User).get_or_none(id=id)
-            if not (token.user.admin is True or token.user.id == entity.user_id):
+            if not (user.admin is True or user.id == entity.user_id):
                 raise HTTPException(detail='Você não tem permissão para acessar este recurso', status_code=HTTPStatus.FORBIDDEN)
         
         return token
