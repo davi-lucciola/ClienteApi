@@ -5,6 +5,14 @@ from app.domain.models import Permission
 
 @dataclass
 class PermissionService:
+    async def find_all(self) -> list[Permission]:
+        all_permissions: list[Permission] = Permission.objects.all()
+
+        if len(all_permissions) == 0:
+            raise HTTPException(status_code=HTTPStatus.NO_CONTENT)
+
+        return all_permissions
+
     async def my_permissions(self, user_id: int):
         permissions = await self.find_all_user_permissions(user_id)
 

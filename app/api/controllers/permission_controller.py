@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.api import HTTPStatus, Response
-from app.api.guard import AuthGuard
+from app.api.guard import AuthGuard, PermissionGuard
 from app.domain.models import Token, Permission
 from app.domain.services import PermissionService
 
@@ -8,9 +8,21 @@ from app.domain.services import PermissionService
 router = APIRouter(prefix='/permission', tags=['Permission'])
 
 
-@router.get('/my', status_code=HTTPStatus.OK)
+@router.get('/my', status_code = HTTPStatus.OK)
 async def get_my_permissions(
     permission_service: PermissionService = Depends(PermissionService), 
     token: Token = Depends(AuthGuard())
 ) -> list[Permission]:
     return await permission_service.my_permissions(token.user.id)
+
+@router.get('/', status_code = HTTPStatus.OK, dependencies=[Depends(PermissionGuard(':admin'))])
+async def index(permission_service: PermissionService = Depends(PermissionService)):
+    return await permission_service.find_all()
+
+@router.post('/', status_code = HTTPStatus.CREATED, dependencies=[Depends(PermissionGuard(':admin'))])
+async def save(permission_service: PermissionService = Depends(PermissionService)):
+    pass
+
+@router.put('/', status_code = HTTPStatus.CREATED, dependencies=[Depends(PermissionGuard(':admin'))])
+async def save(permission_service: PermissionService = Depends(PermissionService)):
+    pass

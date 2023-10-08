@@ -40,9 +40,7 @@ class UserService:
         else:
             user.permissions.remove(admin_permission)
         
-        print(user.permissions)
         new_user: User = await user.upsert(**user.dict())
-        print(new_user.permissions)
         return new_user.id
 
     async def update(self, user: User, token: dict) -> int:

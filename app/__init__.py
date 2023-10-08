@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.api.controllers import *
+from app.infra.database import database, create_tables
 
 
 def create_app(title: str, description: str) -> FastAPI:
@@ -15,12 +16,12 @@ def create_app(title: str, description: str) -> FastAPI:
     return app
 
 def configure_database(app: FastAPI):
-    from app.config import database, create_tables
     
     @app.on_event('startup')
     async def startup():
         if not database.is_connected:
             await database.connect()
+        
         create_tables()
     
     @app.on_event('shutdown')

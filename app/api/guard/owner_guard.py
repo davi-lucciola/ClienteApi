@@ -3,8 +3,9 @@ from fastapi import Depends, Security, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from app.api import HTTPStatus
 from app.api.guard import SECURITY_BEARER, AuthGuard
-from app.domain.models import Model, Token, User
+from app.domain.models import Token, User
 from app.domain.services import AuthService
+from app.infra.database import Model
 
 @dataclass
 class OwnerGuard(AuthGuard):
@@ -21,11 +22,11 @@ class OwnerGuard(AuthGuard):
         if self.model is User:
             entity: Model = await self.model.objects.get_or_none(id=id)
             if not (user.admin is True or user.id == entity.id):
-                raise HTTPException(detail='Você não tem permissão para acessar este recurso', status_code=HTTPStatus.FORBIDDEN)
+                raise HTTPException(detail='Você não tem permissão para acessar este recurso.', status_code=HTTPStatus.FORBIDDEN)
         else:
             entity: Model = await self.model.objects.select_related(User).get_or_none(id=id)
             if not (user.admin is True or user.id == entity.user_id):
-                raise HTTPException(detail='Você não tem permissão para acessar este recurso', status_code=HTTPStatus.FORBIDDEN)
+                raise HTTPException(detail='Você não tem permissão para acessar este recurso.', status_code=HTTPStatus.FORBIDDEN)
         
         return token
     

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from app.api import HTTPStatus, Response
 from app.api.guard import AuthGuard, OwnerGuard, PermissionGuard
-from app.domain.models import *
+from app.api.schemas.user import *
+from app.domain.models import User, Token
 from app.domain.services import UserService
 
 # User Router

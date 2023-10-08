@@ -12,8 +12,8 @@ Tipos de Permissões:
 
 Um usuario terá varias roles.
 '''
-from ormar import Model, Integer, String
-from app.config import BaseMeta
+from ormar import Integer, String
+from app.infra.database import Model, BaseMeta
 
 
 class Permission(Model):
