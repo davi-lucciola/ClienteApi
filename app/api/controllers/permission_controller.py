@@ -19,10 +19,18 @@ async def get_my_permissions(
 async def index(permission_service: PermissionService = Depends(PermissionService)):
     return await permission_service.find_all()
 
+@router.get('/', status_code = HTTPStatus.OK, dependencies=[Depends(PermissionGuard(':admin'))])
+async def index(permission_service: PermissionService = Depends(PermissionService)):
+    return await permission_service.find_all()
+
 @router.post('/', status_code = HTTPStatus.CREATED, dependencies=[Depends(PermissionGuard(':admin'))])
 async def save(permission_service: PermissionService = Depends(PermissionService)):
     pass
 
-@router.put('/', status_code = HTTPStatus.CREATED, dependencies=[Depends(PermissionGuard(':admin'))])
-async def save(permission_service: PermissionService = Depends(PermissionService)):
+@router.put('/{id}', status_code = HTTPStatus.CREATED, dependencies=[Depends(PermissionGuard(':admin'))])
+async def update(id: int, permission_service: PermissionService = Depends(PermissionService)):
+    pass
+
+@router.delete('/{id}', status_code = HTTPStatus.ACCEPTED, dependencies=[Depends(PermissionGuard(':admin'))])
+async def delete(id: int):
     pass

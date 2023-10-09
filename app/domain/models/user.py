@@ -10,5 +10,5 @@ class User(Model):
     id: int = Integer(primary_key=True, autoincrement=True)
     email: str = String(max_length=255, nullable=False, unique=True)
     password: str = String(max_length=255, nullable=False)
-    admin: bool = Boolean(nullable=False, default=False)
-    permissions: list[Permission] = ManyToMany(Permission, skip_reverse=True, through_relation_name='user_id', through_reverse_relation_name='permission_id')
+    super_admin: bool = Boolean(nullable=False, default=False)
+    permissions = ManyToMany(Permission, skip_reverse=True, through_relation_name='user_id', through_reverse_relation_name='permission_id')

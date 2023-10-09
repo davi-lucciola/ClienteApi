@@ -1,3 +1,5 @@
+import decouple as env
+from string import digits, ascii_lowercase, ascii_uppercase, punctuation 
 from fastapi import Depends, HTTPException
 from dataclasses import dataclass
 from app.api import HTTPStatus
@@ -28,22 +30,36 @@ class UserService:
     async def find_by_email(self, email: str) -> User | None:
         return await User.objects.get_or_none(email = email)
 
-    async def save(self, user: User, token: dict = {}) -> int:
+    async def create(self, user: User) -> int:
+        if len(user.password) < 4:
+            raise HTTPException(detail='Sua senha deve conter pelo menos 4 caracteres.', status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+
+        have_lower = have_upper = have_special = have_digit = False
+        for password_char in user.password:
+            if password_char in ascii_lowercase: have_lower = True
+            if password_char in ascii_uppercase: have_upper = True
+            if password_char in digits: have_digit = True
+            if password_char in punctuation: have_special = True
+            
+        if not have_digit:
+            raise HTTPException(detail='Sua senha deve conter numeros.', status_code=HTTPStatus.UNPROCESSABLE_ENTITY)  
+        
+        if not have_lower:
+            raise HTTPException(detail='Sua senha deve conter letras minúsculas.', status_code=HTTPStatus.UNPROCESSABLE_ENTITY)  
+        
+        if not have_upper:
+            raise HTTPException(detail='Sua senha deve conter letras maiúsculas.', status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+        
+        if not have_special:
+            raise HTTPException(detail='Sua senha deve conter caracteres especiais.', status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+        
         if await self.find_by_email(user.email) is not None and user.id is None:
             raise HTTPException(detail='Email já cadastrado.', status_code=HTTPStatus.BAD_REQUEST)
 
-        user.password = self.crypt_service.hash(user.password)
-
-        admin_permission = await Permission.objects.get_or_create(role=':admin')
-        if user.admin is True:
-            user.permissions.add(admin_permission)
-        else:
-            user.permissions.remove(admin_permission)
-        
-        new_user: User = await user.upsert(**user.dict())
+        new_user: User = await self.save(user)
         return new_user.id
 
-    async def update(self, user: User, token: dict) -> int:
+    async def update(self, user: User) -> int:
         user_in_db: User = await self.find_by_id(user.id)
         
         if self.crypt_service.check_hash(user.password, user_in_db.password) is False:
@@ -51,10 +67,11 @@ class UserService:
 
         return await self.save(user)
 
-    async def delete(self, user_id: int, token: dict) -> None:
+    async def delete(self, user_id: int) -> None:
         user: User = await self.find_by_id(user_id)
-
-        if not (token.get('admin') is True or token.get('user_id') == user.id):
-            raise HTTPException(detail='Você não tem permissão para deletar esse usuario', status_code=HTTPStatus.FORBIDDEN)
-
         await user.delete()
+    
+    async def save(self, user: User) -> User:
+        user.password: str = self.crypt_service.hash(user.password)
+        return user.upsert()
+

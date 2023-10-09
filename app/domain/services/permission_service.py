@@ -23,3 +23,11 @@ class PermissionService:
 
     async def find_all_user_permissions(self, user_id: int) -> list[Permission]:
         return await Permission.objects.select_related('users').all(users__id=user_id)
+    
+    async def verify_user_permission(self, user_id: int, role: str) -> None:
+        permissions: list[Permission] = await self.find_all_user_permissions(user_id)
+        user_roles: list[str] = [permission.role for permission in permissions]
+
+        if role not in user_roles:
+            raise HTTPException(detail='Você não tem permissão para acessar esse recurso.', status_code=HTTPStatus.FORBIDDEN)
+        

@@ -1,4 +1,5 @@
 version: '3.9'
+
 services:
   db:
     image: postgres
@@ -12,7 +13,6 @@ services:
     
     volumes:
       - postgres_data:/var/lib/postgres/data
-
 
   app:
     container_name: user_api

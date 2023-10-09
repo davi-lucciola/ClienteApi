@@ -11,24 +11,18 @@ from app.infra.database import Model
 class OwnerGuard(AuthGuard):
     model: Model
 
-    async def __call__(self, 
+    async def __call__(self,
         id: int,
         auth_service: AuthService = Depends(AuthService),
         auth: HTTPAuthorizationCredentials = Security(SECURITY_BEARER)
     ) -> Token:
         token: Token = await super().__call__(auth_service, auth)
-        user: User = await User.objects.get(id=token.user.id)
 
-        if self.model is User:
-            entity: Model = await self.model.objects.get_or_none(id=id)
-            if not (user.admin is True or user.id == entity.id):
-                raise HTTPException(detail='Você não tem permissão para acessar este recurso.', status_code=HTTPStatus.FORBIDDEN)
-        else:
-            entity: Model = await self.model.objects.select_related(User).get_or_none(id=id)
-            if not (user.admin is True or user.id == entity.user_id):
-                raise HTTPException(detail='Você não tem permissão para acessar este recurso.', status_code=HTTPStatus.FORBIDDEN)
+        if await auth_service.verify_owner(id, token.user.id, self.model) is False:
+            raise HTTPException(detail='Você não tem permissão para acessar este recurso.', status_code=HTTPStatus.FORBIDDEN)
         
         return token
     
     def __hash__(self) -> int:
         return hash((type(self),))
+    

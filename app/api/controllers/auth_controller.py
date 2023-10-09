@@ -9,6 +9,7 @@ from app.domain.services import AuthService
 # Auth Router
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
+
 @router.post('/login', status_code = HTTPStatus.OK)
 async def login(credentials: UserCredentials, auth_service: AuthService = Depends(AuthService)):
     token: str = await auth_service.login(User(**credentials.dict()))

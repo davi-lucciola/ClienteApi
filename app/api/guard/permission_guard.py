@@ -8,7 +8,7 @@ from app.domain.services import AuthService, PermissionService
 
 @dataclass
 class PermissionGuard(AuthGuard):
-    permission: str
+    role: str
 
     async def __call__(self, 
         auth_service: AuthService = Depends(AuthService),
@@ -16,14 +16,7 @@ class PermissionGuard(AuthGuard):
         auth: HTTPAuthorizationCredentials = Security(SECURITY_BEARER)
     ) -> Token:
         token: Token = await super().__call__(auth_service, auth)
-
-        user: User = await User.objects.get(id=token.user.id)
-        permissions: list[Permission] = await permission_service.find_all_user_permissions(token.user.id)
-        user_roles: list[str] = [permission.role for permission in permissions]
-        
-        if not (user.admin is True or self.permission in user_roles):
-            raise HTTPException(detail='Você não tem permissão para acessar esse recurso.', status_code=HTTPStatus.FORBIDDEN)
-        
+        await permission_service.verify_user_permission(token.user.id, self.role)
         return token
     
     def __hash__(self) -> int:

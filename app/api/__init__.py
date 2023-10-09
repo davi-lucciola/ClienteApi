@@ -3,5 +3,5 @@ from pydantic import BaseModel
 
 
 class Response(BaseModel):
-    message: str
+    detail: str
     created_id: int | None
