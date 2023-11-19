@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from api.utils.security import CryptService
 from api.domain.models import User
 from api.domain.interfaces.services import IUserService
@@ -30,7 +30,7 @@ class UserService(IUserService):
     def create(self, user: User) -> int:
         user.validate_password()
 
-        if self.find_by_email(user.email) is not None and user.id is None:
+        if self.user_repository.find_by_email(user.email) is not None:
             raise DomainError('Email já cadastrado.')
         
         user.password = self.crypt_service.hash(user.password)
@@ -38,15 +38,18 @@ class UserService(IUserService):
         new_user: User = self.user_repository.save(user)
         return new_user.id
 
-    def update(self, user: User) -> int:
+    def update(self, user: User, password: str) -> int:
+        user.validate_password()
         user_in_db: User = self.find_by_id(user.id)
         
-        if self.crypt_service.check_hash(user.password, user_in_db.password) is False:
+        if self.crypt_service.check_hash(password, user_in_db.password) is False:
             raise DomainError('Senha incorreta.')
+        
+        user_email: User = self.user_repository.find_by_email(user.email)
+        if user_email is not None and user_email.id != user.id:
+            raise DomainError('Email já cadastrado.')
 
         user.password = self.crypt_service.hash(user.password)
 
-        return self.user_repository.save(user)
-
-    def find_by_email(self, email: str) -> User | None:
-        return self.user_repository.find_by_email(email)
+        updated_user = self.user_repository.save(user)
+        return updated_user.id

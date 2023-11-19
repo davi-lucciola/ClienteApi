@@ -14,21 +14,11 @@ class User(BaseModel):
         
         have_lower = have_upper = have_special = have_digit = False
         for password_char in self.password:
-            if password_char in ascii_lowercase: 
-                have_lower = True
-                break
+            if password_char in ascii_lowercase: have_lower = True
 
-            if password_char in ascii_uppercase: 
-                have_upper = True
-                break
-
-            if password_char in digits: 
-                have_digit = True
-                break
-
-            if password_char in punctuation: 
-                have_special = True
-                break
+            if password_char in ascii_uppercase:  have_upper = True
+            if password_char in digits: have_digit = True
+            if password_char in punctuation: have_special = True
             
         if not have_digit:
             raise ValueError('Sua senha deve conter numeros.')

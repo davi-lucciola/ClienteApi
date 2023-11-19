@@ -26,6 +26,7 @@ class UserAdmin(UserSave):
     admin: bool = False
 
 class UserUpdate(UserCredentials):
+    admin: bool = False
     new_password: str
     confirm_new_password: str
 

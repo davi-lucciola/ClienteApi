@@ -6,5 +6,5 @@ class Response:
     message: str
 
 @dataclass
-class IdResponse(Response):
+class ResponseWithId(Response):
     created_id: int
