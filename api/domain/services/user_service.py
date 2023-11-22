@@ -27,7 +27,7 @@ class UserService(IUserService):
         
         return user
 
-    def create(self, user: User) -> int:
+    def create(self, user: User) -> User:
         user.validate_password()
 
         if self.user_repository.find_by_email(user.email) is not None:
@@ -36,9 +36,9 @@ class UserService(IUserService):
         user.password = self.crypt_service.hash(user.password)
         
         new_user: User = self.user_repository.save(user)
-        return new_user.id
+        return new_user
 
-    def update(self, user: User, password: str) -> int:
+    def update(self, user: User, password: str) -> User:
         user.validate_password()
         user_in_db: User = self.find_by_id(user.id)
         
@@ -52,4 +52,8 @@ class UserService(IUserService):
         user.password = self.crypt_service.hash(user.password)
 
         updated_user = self.user_repository.save(user)
-        return updated_user.id
+        return updated_user
+    
+    def delete(self, id: int) -> None:
+        self.find_by_id(id)
+        self.user_repository.delete_by_id(id)
