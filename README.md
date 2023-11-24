@@ -1,8 +1,13 @@
 # User API Template
 
-Template mede with FastAPI and PostgresSQL for develop any system
+Template API mede with FastAPI and PostgresSQL using clean archtecture for develop any system.
 
-# Run Local
+## Tests
+
+I have made Unit Tests and Integrated Tests using Pytest.
+For the integrated tests i use an sqlite db in memory for simplify and not persist in real database.
+
+## Run Local
 
 Having docker installed in your pc, follow the commands:
 

@@ -24,7 +24,7 @@ test_engine = create_engine(
 )
 
 
-def override_get_db() -> Generator[TestSession, None, None]:
+def get_test_db() -> Generator[TestSession, None, None]:
     global test_engine
     db = TestSession(bind=test_engine, autocommit=False)
     try:
@@ -41,10 +41,10 @@ async def test_lifespan(app):
 
 
 test_app = create_app('Teste app', 'App de Teste', test_lifespan)
-test_app.dependency_overrides[get_db] = override_get_db
+test_app.dependency_overrides[get_db] = get_test_db
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='module')
 def test_client() -> Generator[TestClient, None, None]:
     with TestClient(test_app) as test_client:
         yield test_client

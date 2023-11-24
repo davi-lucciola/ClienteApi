@@ -34,25 +34,31 @@ class UserService(IUserService):
             raise DomainError('Email já cadastrado.')
         
         user.password = self.crypt_service.hash(user.password)
-        
-        new_user: User = self.user_repository.save(user)
+        new_user: User = self.user_repository.insert(user)
         return new_user
 
-    def update(self, user: User, password: str) -> User:
-        user.validate_password()
+    def update(self, user: User) -> User:
         user_in_db: User = self.find_by_id(user.id)
-        
-        if self.crypt_service.check_hash(password, user_in_db.password) is False:
+
+        if not self.crypt_service.check_hash(user.password, user_in_db.password):
             raise DomainError('Senha incorreta.')
-        
+
         user_email: User = self.user_repository.find_by_email(user.email)
         if user_email is not None and user_email.id != user.id:
             raise DomainError('Email já cadastrado.')
 
-        user.password = self.crypt_service.hash(user.password)
-
-        updated_user = self.user_repository.save(user)
+        user.password = user_in_db.password
+        updated_user = self.user_repository.update(user)
         return updated_user
+    
+    def change_password(self, id: int, password: str, new_password: str) -> None:
+        user_in_db: User = self.find_by_id(id)
+
+        if not self.crypt_service.check_hash(password, user_in_db.password):
+            raise DomainError('Senha incorreta.')
+        
+        user_in_db.password = self.crypt_service.hash(new_password)
+        self.user_repository.update(user_in_db)
     
     def delete(self, user_id: int) -> None:
         self.find_by_id(user_id)

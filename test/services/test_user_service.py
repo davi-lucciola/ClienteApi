@@ -3,6 +3,7 @@ from http import HTTPStatus
 from api.domain.models import User
 from api.domain.services import UserService
 from api.domain.errors import DomainError, NoContentError, NotFoundError
+from test.conftest import user_service
 
 
 
@@ -114,7 +115,7 @@ def test_create_user_email_registered(valid_user: User, user_service: UserServic
 
 def test_create_user_success(valid_user: User, user_service: UserService):
     user_service.user_repository.find_by_email.return_value = None
-    user_service.user_repository.save.return_value = valid_user
+    user_service.user_repository.insert.return_value = valid_user
 
     user = user_service.create(valid_user)
     
@@ -125,46 +126,67 @@ def test_create_user_success(valid_user: User, user_service: UserService):
 
 # Update User Tests
 def test_update_user_incorect_password(valid_user: User, user_service: UserService):
-    new_user = valid_user.copy()
-    valid_user.password = user_service.crypt_service.hash(valid_user.password)
-    new_user.password += 'test'
-    user_service.user_repository.find_by_id.return_value = valid_user
+    user_in_db = valid_user.copy()
+    user_in_db.password = user_service.crypt_service.hash('senha_incorreta')
+    user_service.user_repository.find_by_id.return_value = user_in_db
 
     with pytest.raises(DomainError) as exception:
-        user_service.update(new_user, '1234')
+        user_service.update(valid_user)
     
     assert exception.value.message == 'Senha incorreta.'
     assert exception.value.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_update_user_email_registered(valid_user: User, user_service: UserService):
-    new_user = valid_user.copy()
-    new_user.id = 2
-    valid_user.password = user_service.crypt_service.hash(valid_user.password)
-    user_service.user_repository.find_by_id.return_value = valid_user
-    user_service.user_repository.find_by_email.return_value = valid_user
+    user_in_db = valid_user.copy()
+    user_in_db.password = user_service.crypt_service.hash(valid_user.password)
+    other_user = valid_user.copy()
+    other_user.id = 123
+    user_service.user_repository.find_by_id.return_value = user_in_db
+    user_service.user_repository.find_by_email.return_value = other_user
 
     with pytest.raises(DomainError) as exception:
-        user_service.update(new_user, new_user.password)
+        user_service.update(valid_user)
     
     assert exception.value.message == 'Email já cadastrado.'
     assert exception.value.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_update_user_success(valid_user: User, user_service: UserService):
-    new_user = valid_user.copy()
-    new_user.email = 'diferente@email.com'
-    new_user.admin = True
+    updated_user = valid_user.copy()
+    updated_user.email = 'updatedemail@gmail.com'
     valid_user.password = user_service.crypt_service.hash(valid_user.password)
     user_service.user_repository.find_by_id.return_value = valid_user
     user_service.user_repository.find_by_email.return_value = valid_user
-    user_service.user_repository.save.return_value = new_user
+    user_service.user_repository.update.return_value = updated_user
 
-    user = user_service.update(new_user, new_user.password)
+    user = user_service.update(updated_user)
     
     assert user is not None
     assert isinstance(user, User)
-    assert user.email != valid_user
+    assert updated_user.email != valid_user.email
+
+
+# Change Password Test
+def test_change_password_incorrect_password(valid_user: User, user_service: UserService):
+    valid_user.password = user_service.crypt_service.hash(valid_user.password)
+    user_service.user_repository.find_by_id.return_value = valid_user
+
+    with pytest.raises(DomainError) as exception:
+        user_service.change_password(1, '1234', '5323')
+    
+    assert exception.value.message == 'Senha incorreta.'
+    assert exception.value.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_change_password_success(valid_user: User, user_service: UserService):
+    password = valid_user.password
+    valid_user.password = user_service.crypt_service.hash(valid_user.password)
+    user_service.user_repository.find_by_id.return_value = valid_user
+
+    user_service.change_password(1, password, '5323')
+    
+    user_service.user_repository.update.assert_called()
 
 
 # Delete User Test

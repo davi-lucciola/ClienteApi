@@ -5,12 +5,13 @@ API de Template com as funcionalidades:
 - Controle de Acesso com Autenticação
 - Sistema de Permissões
 '''
+from typing import AsyncContextManager
 from fastapi import FastAPI
 from api.app.controllers import *
 
 
-def create_app(title: str, description: str) -> FastAPI:
-    app = FastAPI(title=title, description=description)
+def create_app(title: str, description: str, lifespan: AsyncContextManager = None) -> FastAPI:
+    app = FastAPI(title=title, description=description, lifespan=lifespan)
    
     # Routes
     # app.include_router(auth_router)

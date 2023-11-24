@@ -18,21 +18,42 @@ class UserRepository(IUserRepository):
         smtm = select(UserEntity).where(UserEntity.id == id)
         user_entity = self.db.exec(smtm).first()
         return User(**user_entity.dict()) if user_entity is not None else None
-
-    def save(self, user: User) -> User: 
+    
+    def insert(self, user: User) -> User:
+        user_entity = UserEntity(**user.dict())
         try:
-            user_entity = UserEntity(**user.dict())
             self.db.add(user_entity)
             self.db.commit()
-            self.db.flush(user_entity)
-            return User(**user_entity.dict())
-        except Exception as err:
-            raise err('Houve um erro ao inserir o usuario.')
+        except:
+            self.db.rollback()
+            raise Exception('Houve um erro ao cadastrar o usuário')
+        
+        self.db.refresh(user_entity)
+        return User(**user_entity.dict())
+       
+    def update(self, user: User) -> User:
+        user_entity = self.db.exec(select(UserEntity).where(UserEntity.id == user.id)).one()
+        try:
+            user_entity.email = user.email
+            user_entity.password = user.password
+            user_entity.admin = user.admin
+
+            self.db.commit()
+        except:
+            self.db.rollback()
+            raise Exception('Houve um erro ao atualizar o usuário')
+        
+        self.db.refresh(user_entity)
+        return User(**user_entity.dict())
 
     def delete(self, id: int) -> None: 
-        user = self.db.exec(select(UserEntity).where(UserEntity.id == id)).first()
-        self.db.delete(user)
-        self.db.commit()
+        user = self.db.exec(select(UserEntity).where(UserEntity.id == id)).one()
+        try:
+            self.db.delete(user)
+            self.db.commit()
+        except Exception as err:
+            self.db.rollback()
+            raise Exception('Houve um erro ao deletar o usuário.', str(err))
 
     def find_by_email(self, email: str) -> User | None:
         return self.db.exec(select(UserEntity).where(UserEntity.email == email)).first()
