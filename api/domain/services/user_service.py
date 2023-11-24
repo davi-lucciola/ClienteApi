@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from api.utils.security import CryptService
 from api.domain.models import User
 from api.domain.interfaces.services import IUserService
 from api.domain.interfaces.repositories import IUserRepository
-from api.domain.exceptions import DomainError, NoContentError, NotFoundError
+from api.domain.errors import DomainError, NoContentError, NotFoundError
 
 
 @dataclass
@@ -54,6 +54,6 @@ class UserService(IUserService):
         updated_user = self.user_repository.save(user)
         return updated_user
     
-    def delete(self, id: int) -> None:
-        self.find_by_id(id)
-        self.user_repository.delete_by_id(id)
+    def delete(self, user_id: int) -> None:
+        self.find_by_id(user_id)
+        self.user_repository.delete(user_id)

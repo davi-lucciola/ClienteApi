@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from dataclasses import dataclass, field
-from api.domain.exceptions import DomainError
+from api.domain.errors import DomainError
 
 
 @dataclass

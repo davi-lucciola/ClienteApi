@@ -1,5 +1,6 @@
-# from http import HTTPStatus
-# from fastapi.testclient import TestClient 
+from http import HTTPStatus
+from fastapi.testclient import TestClient 
+
 
 # def test_find_all_users_sucess(test_client: TestClient) -> None:
 #     response = test_client.get('/user')

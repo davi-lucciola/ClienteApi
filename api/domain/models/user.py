@@ -6,7 +6,7 @@ class User(BaseModel):
     id: int | None
     email: EmailStr
     password: str 
-    admin: bool
+    admin: bool = False
 
     def validate_password(self):
         if len(self.password) < 4:

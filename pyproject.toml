@@ -16,7 +16,8 @@ bcrypt = "^4.0.1"
 python-jose = "^3.3.0"
 httpx = "^0.25.0"
 email-validator = "^2.1.0.post1"
-psycopg2 = "^2.9.9"
+psycopg2-binary = "^2.9.9"
+alembic = "^1.12.1"
 
 
 [tool.poetry.group.dev.dependencies]

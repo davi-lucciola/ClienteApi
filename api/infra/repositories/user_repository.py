@@ -19,8 +19,20 @@ class UserRepository(IUserRepository):
         user_entity = self.db.exec(smtm).first()
         return User(**user_entity.dict()) if user_entity is not None else None
 
-    def save(self, user: User) -> User: ...
+    def save(self, user: User) -> User: 
+        try:
+            user_entity = UserEntity(**user.dict())
+            self.db.add(user_entity)
+            self.db.commit()
+            self.db.flush(user_entity)
+            return User(**user_entity.dict())
+        except Exception as err:
+            raise err('Houve um erro ao inserir o usuario.')
 
-    def delete_by_id(self, id: int) -> None: ...
+    def delete(self, id: int) -> None: 
+        user = self.db.exec(select(UserEntity).where(UserEntity.id == id)).first()
+        self.db.delete(user)
+        self.db.commit()
 
-    def find_by_email(self, email: str) -> User | None: ...
+    def find_by_email(self, email: str) -> User | None:
+        return self.db.exec(select(UserEntity).where(UserEntity.email == email)).first()

@@ -4,7 +4,7 @@ from api.app import UserServiceDependency
 # from api.app.guard import AuthGuard, OwnerGuard, PermissionGuard
 from api.app.schemas.user import *
 from api.domain.models import User
-from api.domain.services import UserService
+from api.domain.interfaces.services import IUserService
 
 
 # User Router
@@ -12,19 +12,19 @@ router = APIRouter(prefix='/user', tags=['User'])
 
 
 @router.get('/', status_code = HTTPStatus.OK) # dependencies=[Depends(AuthGuard())]
-async def index(user_service: UserService = Depends(UserServiceDependency)) -> list[UserDTO]:
+async def index(user_service: IUserService = Depends(UserServiceDependency)) -> list[UserDTO]:
     ''' Endpoint para listar todos os usuarios. '''
-    users = await user_service.find_all()
+    users = user_service.find_all()
     return users
 
 @router.get('/{id}', status_code = HTTPStatus.OK) # dependencies=[Depends(AuthGuard())]
-async def show(id: int, user_service: UserService = Depends(UserServiceDependency)) -> UserDTO:
+async def show(id: int, user_service: IUserService = Depends(UserServiceDependency)) -> UserDTO:
     ''' Endpoint para detalhar um usuario dado o identificador. '''
-    user = await user_service.find_by_id(id)
+    user = user_service.find_by_id(id)
     return user
 
 @router.post('/secure', status_code = HTTPStatus.CREATED) # dependencies=[Depends(PermissionGuard(':admin'))]
-async def create_secure(user: UserAdmin, user_service: UserService = Depends(UserServiceDependency)):
+async def create_secure(user: UserAdmin, user_service: IUserService = Depends(UserServiceDependency)):
     ''' 
     Endpoint para cadastrar um usuario. (Autenticação Necessária).
     Somente usuários admin podem cadastrar outros usuários admin.
@@ -33,7 +33,7 @@ async def create_secure(user: UserAdmin, user_service: UserService = Depends(Use
     return ResponseWithId(message='Usuário cadastrado com sucesso.', created_id=user_service.create(user))
 
 @router.post('/public', status_code = HTTPStatus.CREATED)
-async def create_public(user: UserSave, user_service: UserService = Depends(UserServiceDependency)):
+async def create_public(user: UserSave, user_service: IUserService = Depends(UserServiceDependency)):
     ''' 
     Endpoint para cadastrar um usuario (Autenticação não necessária). 
     '''
@@ -55,10 +55,10 @@ async def create_public(user: UserSave, user_service: UserService = Depends(User
 #     return Response(message='Usuário editado com sucesso.', created_id=user_service.update(updated_user, user.password))
 
 @router.delete('/{id}', status_code = HTTPStatus.ACCEPTED) # dependencies=[Depends(OwnerGuard(User))]
-async def delete(id: int, user_service: UserService = Depends(UserServiceDependency)):
+async def delete(id: int, user_service: IUserService = Depends(UserServiceDependency)):
     ''' 
     Endpoint para deletar um usuario dado o identificador.
     Somente o próprio usuário ou um usuario admin tem acesso a remoção.
     '''
-    await user_service.delete(id)
+    user_service.delete(id)
     return Response(message='Usuário removido com sucesso.')
